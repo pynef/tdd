@@ -1,0 +1,49 @@
+pipeline {
+    agent any
+    stages {
+        stage("Repository") {
+            steps {
+              //git url: "https://github.com/pynef/jenkins-pipeline.git"
+              checkout scm
+              sh "echo repository"
+            }
+        }
+        stage("Build") {
+            steps {
+              echo "build"
+              sh "echo BUILD_NUMBER"
+              echo "agregando artefacto"
+            }
+        }
+        stage("Test") {
+            steps {
+              parallel (
+                  syntax: { sh "echo syntax" },
+                  grep: { sh "echo 'grep'" }
+              )
+            }
+        }
+        stage ('Apply') {
+            input {
+              message "Are you sure?"
+              ok "Yes"
+            }
+            steps {
+              sh "echo apply"
+            }
+        }
+        stage("Deploy") {
+           when {
+               expression {
+                 return params.DEPLOY ==~ /(?i)(Y|YES|T|TRUE|ON|RUN)/
+               }
+           }
+           steps {
+             build job: "another_job", parameters: [
+                [$class: 'StringParameterValue', name: 'SLACK_CHANNEL', value: "monitoring"],
+                [$class: 'StringParameterValue', name: 'TYPE', value: 'cron']
+              ]
+           }
+         }
+    }
+}
