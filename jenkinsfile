@@ -32,18 +32,5 @@ pipeline {
               sh "echo apply"
             }
         }
-        stage("Deploy") {
-           when {
-               expression {
-                 return params.DEPLOY ==~ /(?i)(Y|YES|T|TRUE|ON|RUN)/
-               }
-           }
-           steps {
-             build job: "another_job", parameters: [
-                [$class: 'StringParameterValue', name: 'SLACK_CHANNEL', value: "monitoring"],
-                [$class: 'StringParameterValue', name: 'TYPE', value: 'cron']
-              ]
-           }
-         }
     }
 }
